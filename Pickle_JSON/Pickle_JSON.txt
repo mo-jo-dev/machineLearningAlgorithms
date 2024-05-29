@@ -1,0 +1,79 @@
+import json
+
+data = {
+    'name': 'John',
+    'age': 30,
+    'city': 'New York'
+}
+
+json_string = json.dumps(data)
+print("JSON string:", json_string)
+
+parsed_data = json.loads(json_string)
+print("Parsed data:", parsed_data)
+import pickle
+
+data = {
+    'name': 'John',
+    'age': 30,
+    'city': 'New York'
+}
+
+pickle_bytes = pickle.dumps(data)
+print("Pickle bytes:", pickle_bytes)
+
+parsed_data = pickle.loads(pickle_bytes)
+print("Parsed data:", parsed_data)
+import pandas as pd
+from sklearn.datasets import load_iris
+import json
+import pickle
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the Iris dataset
+iris = load_iris()
+data = iris.data
+target = iris.target
+target_names = iris.target_names
+
+# Create a DataFrame from the iris data
+df = pd.DataFrame(data, columns=iris.feature_names)
+df['species'] = target_names[target]
+
+# Save the data to JSON
+with open('iris_data.json', 'w') as f:
+    json.dump(df.to_dict(), f)
+
+# Save the data to pickle
+with open('iris_data.pkl', 'wb') as f:
+    pickle.dump(df, f)
+
+# Visualize the data
+# Load data from JSON file
+with open('iris_data.json', 'r') as f:
+    json_data = json.load(f)
+
+# Load data from pickle file
+with open('iris_data.pkl', 'rb') as f:
+    pickle_data = pickle.load(f)
+
+# Display the contents of both files
+print("Contents of JSON file:")
+print(json_data)
+
+print("\nContents of pickle file:")
+print(pickle_data)
+
+# Pairplot
+sns.pairplot(df, hue='species')
+plt.suptitle('Pairplot of Iris Dataset', y=1.02)
+plt.show()
+
+# Boxplot
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='species', y='petal length (cm)', data=df)
+plt.title('Petal Length by Species')
+plt.xlabel('Species')
+plt.ylabel('Petal Length (cm)')
+plt.show()

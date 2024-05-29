@@ -1,0 +1,55 @@
+pip install --upgrade pandas
+import math
+import random
+import csv
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_wine
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score as asc
+wine = load_wine()
+data = wine.data
+feature = wine.feature_names
+target_name = wine.target_names
+target = wine.target
+dict = {
+    "alcohol" : data[:,0] , 
+    "malic_acid" : data[:,1] ,
+    "ash" : data[:,2] ,
+    "alcalinity_of_ash" : data[:,3] ,
+    "magnesium" : data[:,4] ,
+    "total_phenols" : data[:,5] ,
+    "flavanoids" : data[:,6] ,
+    "nonflavanoid_phenols" : data[:,7] ,
+    "proanthocyanins" : data[:,8] ,
+    "color_intensity" : data[:,9] ,
+    "hue" : data[:,10] ,
+    "od280/od315_of_diluted_wines" : data[:,11] ,
+    "proline" : data[:,12] ,
+    "Target" : target
+}
+df = pd.DataFrame(data)
+df
+df.columns = wine.feature_names
+df
+X_train, X_test, y_train, y_test = train_test_split(data,target,test_size=0.2)
+clf = SVC(kernel = 'linear')
+clf.fit(X_train,y_train)
+pred = clf.predict(X_test)
+cmp = pd.DataFrame(y_test)
+cmp['SVM'] = pred
+cmp.head()
+asc(y_test,pred)
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+lda = LDA()
+df_lda = lda.fit_transform(df, target)
+df_lda = pd.DataFrame(df_lda)
+data = df_lda
+df_lda.head()
+X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.2, stratify = target, random_state = 30)
+clf.fit(X_train, y_train)
+pred1 = clf.predict(X_test)
+cmp['SVM_LDA'] = pred1
+cmp.head()
+asc(y_test, pred1)

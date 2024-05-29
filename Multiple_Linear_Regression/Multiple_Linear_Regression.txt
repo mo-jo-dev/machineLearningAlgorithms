@@ -1,0 +1,69 @@
+# Importing required Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+# Reading the Dataset
+data = pd.read_csv('./50_Startups.csv')
+data.head(5)
+# Hot Encoding the string values
+ny = []
+cal = []
+florida = []
+
+for val in data['State'] :
+    ny.append(1 if val=='New York' else 0)
+    cal.append(1 if val=='California' else 0)
+    florida.append(1 if val=='Florida' else 0)
+data['ny'] = ny
+data['cal'] = cal
+data['florida'] = florida
+data = data.drop(columns=['State'])
+data.head()
+# Scaling of data
+data_max_scaled = data.copy()
+column = 'R&D Spend'
+data_max_scaled[column] = data_max_scaled[column] /data_max_scaled[column].abs().max()
+column = 'Administration'
+data_max_scaled[column] = data_max_scaled[column] /data_max_scaled[column].abs().max()
+column = 'Marketing Spend'
+data_max_scaled[column] = data_max_scaled[column] /data_max_scaled[column].abs().max()
+display(data_max_scaled.head()) 
+# Splitting the data and testing the model
+y = data_max_scaled['Profit']
+X = data_max_scaled.drop(columns=['Profit'])
+X_train,X_test, y_train,  y_test = train_test_split(X, y, random_state=536)
+model = LinearRegression()
+model.fit(X_train, y_train)
+predicted = model.predict(X_test)
+predicted
+r2_score(predicted,y_test)
+# Trying on single feature
+newdata = pd.read_csv('./50_Startups.csv')
+Xsingle = newdata['Marketing Spend'].values.reshape(-1, 1)  # Reshape to a 2D array
+ysingle = newdata['Profit'].values
+Xsingle_train, Xsingle_test, ysingle_train, ysingle_test = train_test_split(Xsingle, ysingle, random_state=536)
+
+single_model = LinearRegression()
+single_model.fit(Xsingle_train, ysingle_train)
+single_prediction = single_model.predict(Xsingle_test)
+r2_score(single_prediction, ysingle_test)
+import seaborn as sns
+import statsmodels.api as sm
+sns.set()
+cols = ['Profit', 'R&D Spend', 'Marketing Spend', 'Administration']
+sns.pairplot(data[cols], height = 2.5)
+plt.show();
+# Plotting Histogram
+%matplotlib inline
+plt.figure(figsize=(12,10))
+cor = data.corr()
+sns.heatmap(cor, annot=True, cmap=plt.cm.Reds)
+plt.show()
+from scipy.stats import norm
+from scipy import stats
+sns.distplot(data['Profit'], fit=norm);
+fig = plt.figure()
+res = stats.probplot(data['Profit'], plot=plt)

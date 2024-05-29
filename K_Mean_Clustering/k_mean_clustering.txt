@@ -1,0 +1,79 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import csv
+def read_csv(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        data = list(reader)
+        columns = data[0]
+        data = data[1:]
+        return data, columns
+
+data, columns = read_csv('./clustering.csv')
+print(columns)
+for row in data:
+    print(row)
+# Identify indices for LoanAmount and ApplicantIncome
+loan_amount_index = columns.index('LoanAmount')
+applicant_income_index = columns.index('ApplicantIncome')
+# Extract the specific columns
+loan_amounts = []
+applicant_incomes = []
+
+for row in data:
+    loan_amounts.append(float(row[loan_amount_index]))
+    applicant_incomes.append(float(row[applicant_income_index]))
+# Convert lists to numpy arrays
+loan_amounts = np.array(loan_amounts)
+applicant_incomes = np.array(applicant_incomes)
+
+# Stack columns to create a 2D array
+data_array = np.column_stack((loan_amounts, applicant_incomes))
+K = 3
+# Randomly initialize centroids
+np.random.seed(42)  # For reproducibility
+initial_indices = np.random.choice(len(data_array), K, replace=False)
+centroids = data_array[initial_indices, :]
+# Plot initial data
+plt.scatter(data_array[:, 1], data_array[:, 0], c='black')
+plt.scatter(centroids[:, 1], centroids[:, 0], c='red')
+plt.xlabel('Annual Income')
+plt.ylabel('Loan Amount (In Thousands)')
+plt.show()
+diff = 1
+j = 0
+
+while diff != 0:
+    # Calculate distances from points to centroids
+    distances = np.linalg.norm(data_array[:, np.newaxis] - centroids, axis=2)
+
+    # Assign clusters based on minimum distance
+    clusters = np.argmin(distances, axis=1)
+
+    # Compute new centroids
+    new_centroids = np.array([data_array[clusters == k].mean(axis=0) for k in range(K)])
+    
+    # Handle empty clusters by reassigning a random data point as the new centroid
+    for idx, centroid in enumerate(new_centroids):
+        if np.isnan(centroid).any():
+            new_centroids[idx] = data_array[np.random.choice(len(data_array))]
+    
+    # Check for convergence
+    if j == 0:
+        diff = 1
+        j += 1
+    else:
+        diff = np.sum(np.abs(new_centroids - centroids))
+        print(diff)
+
+    centroids = new_centroids
+# Plot final clusters
+colors = ['blue', 'green', 'cyan']
+for k in range(K):
+    cluster_data = data_array[clusters == k]
+    plt.scatter(cluster_data[:, 1], cluster_data[:, 0], c=colors[k])
+
+plt.scatter(centroids[:, 1], centroids[:, 0], c='red')
+plt.xlabel('Annual Income')
+plt.ylabel('Loan Amount (In Thousands)')
+plt.show()

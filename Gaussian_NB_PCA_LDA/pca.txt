@@ -1,0 +1,33 @@
+import random
+import csv
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_wine
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score as asc
+wine = load_wine()
+df = pd.DataFrame(wine.data)
+X = wine.data
+y = wine.target
+df
+df.columns = wine.feature_names
+df
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.5, random_state = 0)
+gnb = GaussianNB()
+y_pred = gnb.fit(X_train, y_train).predict(X_test)
+asc(y_test, y_pred)
+cmp = pd.DataFrame(y_test)
+cmp['NB'] = y_pred
+cmp.head()
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+
+df_pca = pca.fit_transform(df)
+df_pca = pd.DataFrame(df_pca)
+df_pca.head()
+X = df_pca
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, stratify = y, random_state=42)
+gnb.fit(X_train,y_train)
+pred = gnb.predict(X_test)
+asc(pred,y_test)

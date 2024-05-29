@@ -1,0 +1,74 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+import csv
+def read_csv(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        data = list(reader)
+        columns = data[0]
+        data = data[1:]
+        return data, columns
+
+data, columns = read_csv('./Salary.csv')
+print(columns)
+for row in data:
+    print(row)
+def train_test_splitter(X, y, test_size = 0.2):
+    indices = list(range(len(X)))
+    random.shuffle(indices)
+    
+    test_set_size = int(len(X) * test_size)
+    
+    test_indices = indices[:test_set_size]
+    train_indices = indices[test_set_size:]
+    
+    X_train = np.array([X[i] for i in train_indices])
+    X_test = np.array([X[i] for i in test_indices])
+    y_train = np.array([y[i] for i in train_indices])
+    y_test = np.array([y[i] for i in test_indices])
+    
+    return X_test, y_train, X_train, y_test
+class SimpleLinearRegression:
+    
+    def __init__(self, learning_rate=0.01, iterations = 2000):
+        self.learning_rate=learning_rate
+        self.iterations=iterations
+        self.cofficients = None
+        self.intercept = None
+        
+    def predict(self, X):
+        return self.intercept + self.cofficients * X
+        
+    def fit(self,X,y):
+        self.cofficients = 0
+        self.intercept = 0
+        n=len(X)
+        
+        for i in range(self.iterations):
+            y_predicted = self.predict(X)
+            
+            d_cofficient = (-2/n)*sum(X*(y-y_predicted))
+            d_intercept =  (-2/n) *sum((y-y_predicted))
+            
+            self.cofficients -= self.learning_rate * d_cofficient
+            self.intercept -= self.learning_rate * d_intercept
+X = [float(row[0]) for row in data]
+y = [float(row[1]) for row in data]
+X_test, y_train, X_train, y_test = train_test_splitter(X,y)
+print(y_test)
+model = SimpleLinearRegression()
+model.fit(X_train, y_train)
+predicted = model.predict(X_test)
+plt.scatter(X_test, y_test )
+plt.legend('a')
+# plt.show()
+plt.plot(X_test, predicted)
+from sklearn.metrics import r2_score as r2_scr
+r2_scr(y_test, predicted)
+df = pd.DataFrame(data = {'predicted' : predicted, 'actual' : y_test})
+df
+mse = (np.square(np.subtract(predicted,y_test)).mean())
+mse
+from sklearn.metrics import mean_squared_error
+mean_squared_error(predicted,y_test)
